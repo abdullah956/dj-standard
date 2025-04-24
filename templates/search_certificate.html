@@ -1,0 +1,25 @@
+<form method="get">
+  <input type="text" name="card_no" placeholder="Enter Card Number">
+  <button type="submit">Search</button>
+</form>
+
+{% if certificate %}
+  <h2>Certificate Details</h2>
+  <ul>
+    <li><strong>Card No:</strong> {{ certificate.card_no }}</li>
+    <li><strong>Name:</strong> {{ certificate.name }}</li>
+    <li><strong>Iqama ID:</strong> {{ certificate.iqama_id }}</li>
+    <li><strong>Certified Level:</strong> {{ certificate.certified_level }}</li>
+    <li><strong>Model Level:</strong> {{ certificate.model_level }}</li>
+    <li><strong>Issued On:</strong> {{ certificate.issued_on }}</li>
+    <li><strong>Valid Until:</strong> {{ certificate.valid_until }}</li>
+    {% if certificate.photo %}
+      <li><img src="{{ certificate.photo.url }}" width="150"></li>
+    {% endif %}
+    {% if certificate.qr_code %}
+      <li><img src="{{ certificate.qr_code.url }}" width="150"></li>
+    {% endif %}
+  </ul>
+{% elif searched %}
+  <p>No certificate found for that card number.</p>
+{% endif %}

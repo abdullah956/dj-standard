@@ -1,0 +1,26 @@
+<table>
+  <thead>
+    <tr>
+      <th>Card No</th>
+      <th>Name</th>
+      <th>Iqama ID</th>
+      <th>Certified Level</th>
+      <th>Model Level</th>
+      <th>Issued On</th>
+      <th>Valid Until</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cert in certificates %}
+      <tr>
+        <td>{{ cert.card_no }}</td>
+        <td>{{ cert.name }}</td>
+        <td>{{ cert.iqama_id }}</td>
+        <td>{{ cert.certified_level }}</td>
+        <td>{{ cert.model_level }}</td>
+        <td>{{ cert.issued_on }}</td>
+        <td>{{ cert.valid_until }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

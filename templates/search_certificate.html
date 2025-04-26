@@ -1,25 +1,498 @@
-<form method="get">
-  <input type="text" name="card_no" placeholder="Enter Card Number">
-  <button type="submit">Search</button>
-</form>
+{% load static %}
 
-{% if certificate %}
-  <h2>Certificate Details</h2>
-  <ul>
-    <li><strong>Card No:</strong> {{ certificate.card_no }}</li>
-    <li><strong>Name:</strong> {{ certificate.name }}</li>
-    <li><strong>Iqama ID:</strong> {{ certificate.iqama_id }}</li>
-    <li><strong>Certified Level:</strong> {{ certificate.certified_level }}</li>
-    <li><strong>Model Level:</strong> {{ certificate.model_level }}</li>
-    <li><strong>Issued On:</strong> {{ certificate.issued_on }}</li>
-    <li><strong>Valid Until:</strong> {{ certificate.valid_until }}</li>
-    {% if certificate.photo %}
-      <li><img src="{{ certificate.photo.url }}" width="150"></li>
-    {% endif %}
-    {% if certificate.qr_code %}
-      <li><img src="{{ certificate.qr_code.url }}" width="150"></li>
-    {% endif %}
-  </ul>
-{% elif searched %}
-  <p>No certificate found for that card number.</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Standard Arabia Inspection</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      .navbar-custom {
+        background-color: #f8f9fa;
+        padding: 0.8rem 1rem;
+      }
+      .nav-link {
+        font-weight: 600;
+        color: black;
+      }
+      .nav-link.red {
+        color: red;
+      }
+
+      .nav-link:hover {
+        background-color: #48433f;
+        color: white;
+        padding: 20px 20px;
+        border-radius: 35px;
+      }
+
+      .nav-link.red:hover {
+        background-color: #48433f;
+        color: white;
+        padding: 20px 20px;
+        border-radius: 35px;
+      }
+      .navbar-toggler-icon-custom {
+        width: 24px;
+        height: 3px;
+        background-color: #1e3a5f;
+        display: block;
+        margin: 5px 0;
+      }
+      .navbar-toggler-custom {
+        border: none;
+        background: none;
+      }
+
+      .navbar-toggler {
+        border: none;
+        background: transparent;
+        padding: 0.25rem;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      .custom-toggler-icon {
+        width: 24px;
+        height: 3px;
+        background-color: #004182;
+        display: block;
+        margin: 5px 0;
+        border-radius: 2px;
+      }
+
+      .hero-section {
+        position: relative;
+        width: 100%;
+        height: 300px; /* You can adjust height */
+        background: url("{% static 'images/about-banner.webp' %}") no-repeat
+          center center/cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hero-text {
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+      }
+
+      .form-box {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 60px 50px;
+        margin-top: 140px;
+      }
+      .form-control {
+        background-color: #f7f7f7;
+        border: none;
+        border-radius: 8px;
+        padding: 14px 20px;
+      }
+      .btn-custom {
+        background-color: #0d5c91;
+        color: white;
+        border-radius: 30px;
+        padding: 17px 42px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+      .btn-custom:hover {
+        background-color: #48433f;
+        color: white;
+      }
+
+      .custom-btn {
+        background-color: #0d5c91;
+        color: white;
+        border-radius: 30px;
+        font-weight: bold;
+        padding: 10px 30px;
+        font-size: 18px;
+      }
+      .custom-btn:hover {
+        background-color: #09456b;
+        color: white;
+      }
+      .card-header {
+        background-color: #f7f7f7;
+        font-weight: bold;
+      }
+      .data-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 15px;
+      }
+      .label-text {
+        font-weight: bold;
+        color: #0d5c91;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-custom">
+      <div
+        class="container-fluid d-flex align-items-center justify-content-between"
+      >
+        <!-- Left Logo -->
+        <a class="navbar-brand d-flex align-items-center p-2" href="#">
+          <img
+            src="{% static 'images/logo1.webp' %}"
+            alt="Standard Arabia Logo"
+            style="width: 335px"
+          />
+        </a>
+
+        <!-- Mid Logo (only on large screens) -->
+        <img
+          src="{% static 'images/mid-logo.webp' %}"
+          alt="Vision 2030 Logo"
+          style="height: 55px; margin-right: -200px"
+          class="d-none d-md-block"
+        />
+
+        <!-- Right Side Nav Links (only on large screens) -->
+        <div class="d-none d-lg-flex align-items-center gap-4">
+          <a href="#" class="nav-link">Contact Us</a>
+          <a href="#" class="nav-link red mx-5">Verification</a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero-section">
+      <div class="overlay">
+        <h1 class="hero-text">Verification</h1>
+      </div>
+    </section>
+
+    <div class="container form-box">
+      <div class="d-flex align-items-center">
+        <form class="d-flex w-100" method="get">
+          <input
+            type="text"
+            name="certificate_no"
+            class="form-control me-3"
+            style="width: 50%"
+            placeholder="Enter Certificate No. or Sticker No."
+            required
+          />
+          <button type="submit" class="btn btn-custom">Verify</button>
+        </form>
+      </div>
+
+      {% if certificate %}
+      <div class="container text-center mb-4 mt-5">
+        <h6 class="text-success">
+          Standard Arabia confirms below candidate successfully completed
+          training and certification
+        </h6>
+        <button class="btn custom-btn my-3">Verification Data</button>
+      </div>
+
+      <!-- TABLE FOR LARGE SCREENS -->
+      <div class="container d-none d-md-block">
+        <table class="table table-bordered align-middle text-center">
+          <thead style="background-color: #0d5c91; color: white">
+            <tr>
+              <th style="background-color: #0d5c91; color: white">Name</th>
+              <th style="background-color: #0d5c91; color: white">
+                IqamaNo/ID
+              </th>
+              <th style="background-color: #0d5c91; color: white">
+                Course Name
+              </th>
+              <th style="background-color: #0d5c91; color: white">Card No</th>
+              <th style="background-color: #0d5c91; color: white">
+                Issued Date
+              </th>
+              <th style="background-color: #0d5c91; color: white">
+                Expiry Date
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ certificate.name }}</td>
+              <td>{{ certificate.iqama_id }}</td>
+              <td>{{ certificate.certified_level }}</td>
+              <td>{{ certificate.card_no }}</td>
+              <td>{{ certificate.issued_on|date:"d-m-Y" }}</td>
+              <td>{{ certificate.valid_until|date:"d-m-Y" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <style>
+        .card {
+          border: 1px solid #e9e9e9;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+        }
+        .card-header {
+          background-color: #f0f0f0 !important; /* Dark Blue */
+          color: #003366;
+          font-weight: bold;
+          border-bottom: 1px solid #c5ceff;
+          border-top-left-radius: 8px;
+          border-top-right-radius: 8px;
+          margin: 8px;
+        }
+        .card-body {
+          background-color: #fff;
+          border-bottom-left-radius: 8px;
+          border-bottom-right-radius: 8px;
+        }
+      </style>
+
+      <!-- CARDS FOR SMALL SCREENS -->
+      <div class="container d-block d-md-none">
+        <div class="card mb-3">
+          <div class="card-header p-2">Name</div>
+          <div class="card-body p-2">
+            <p class="mb-0">{{ certificate.name }}</p>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header p-2">IqamaNo/ID</div>
+          <div class="card-body p-2">
+            <p class="mb-0">{{ certificate.iqama_id }}</p>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header p-2">Course Name</div>
+          <div class="card-body p-2">
+            <p class="mb-0">{{ certificate.certified_level }}</p>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header p-2">Card No</div>
+          <div class="card-body p-2">
+            <p class="mb-0">{{ certificate.card_no }}</p>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header p-2">Issued Date</div>
+          <div class="card-body p-2">
+            <p class="mb-0">{{ certificate.issued_on|date:"d-m-Y" }}</p>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-header p-2">Expiry Date</div>
+          <div class="card-body p-2">
+            <p class="mb-0">{{ certificate.valid_until|date:"d-m-Y" }}</p>
+          </div>
+        </div>
+      </div>
+
+      {% elif searched %}
+      <p>No certificate found for that card number.</p>
+      {% endif %}
+    </div>
+
+    <style>
+      .bg-f-custom {
+        background-color: #14253c;
+        background-image: url('{% static "images/footer.png" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll; /* or 'fixed' if you want parallax effect */
+      }
+    </style>
+    
+
+    <br />
+    <br />
+    <br />
+    <footer class="bg-f-custom text-white pt-5 pb-4 mt-5">
+      <div class="container text-center text-md-start mt-5">
+        <div class="row text-center text-md-start">
+          <!-- Logo and Description -->
+          <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mt-3">
+            <h5 class="mb-4 font-weight-bold">
+              <img
+                src="{% static 'images/logo-f.webp' %}"
+                alt="Logo"
+                style="height: 100px"
+              />
+            </h5>
+            <p class="text-secondary mt-2">
+              Standard Arabia is TVTC, Saudi Arabia Approved Training Center
+              accredited by International Agency.
+            </p>
+
+            <!-- Social Icons -->
+            <div class="mt-4">
+              <a href="#" class="text-white me-4"
+                ><i class="fab fa-facebook-f fa-lg"></i
+              ></a>
+              <a href="#" class="text-white me-4"
+                ><i class="fab fa-instagram fa-lg"></i
+              ></a>
+              <a href="#" class="text-white me-4"
+                ><i class="fab fa-linkedin-in fa-lg"></i
+              ></a>
+              <a href="#" class="text-white me-4"
+                ><i class="fab fa-youtube fa-lg"></i
+              ></a>
+              <a href="#" class="text-white"
+                ><i class="fab fa-twitter fa-lg"></i
+              ></a>
+            </div>
+          </div>
+
+          <!-- Training Programs -->
+          <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mt-3">
+            <h5 class="mb-4 font-weight-bold">Training Programs</h5>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >IPAF Approved Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >IADC Approved Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >OSHA Approved Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >NEBOSH Approved Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >TVTC Approved Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >Rigging & Lifting Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >First Aid & BLS Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >IOSH Approved Training Program</a
+              >
+            </p>
+            <p>
+              <a href="#" class="text-secondary text-decoration-none"
+                >PASMA Approved Training Program</a
+              >
+            </p>
+          </div>
+
+          <!-- Contact Us -->
+          <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mt-3">
+            <h5 class="mb-4 font-weight-bold">Contact Us</h5>
+            <p class="text-secondary">
+              <i class="fas fa-phone-alt me-2"></i> +966-13-3670801
+            </p>
+            <p class="text-secondary">
+              <i class="fas fa-phoe-alt me-2"></i> +966-53-9461485
+            </p>
+            <p class="text-secondary">
+              <i class="fas fa-envelope me-2"></i> admin@standardarabia.com
+            </p>
+            <p class="text-secondary">
+              <i class="fas fa-envlope me-2"></i> info@standardarabia.com
+            </p>
+            <p class="text-secondary">
+              <i class="fas fa-map-marker-alt me-2"></i> P.O. Box 10353, Al
+              Jubail 31961, Support Industrial Zone, Jubail, KSA
+            </p>
+          </div>
+        </div>
+
+        <hr class="mb-4" />
+
+        <div class="row text-center text-md-start align-items-center">
+          <div class="col-md-8 col-lg-8">
+            <p>© 2024 Standard Arabia Inspection Co | All Rights Reserved</p>
+          </div>
+
+          <div class="col-md-4 col-lg-4 text-md-end">
+            <p>
+              Designed by
+              <a href="#" class="text-white text-decoration-none"
+                >BM Softtech</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const menuButton = document.getElementById("menuToggleButton");
+        const navbarMenu = document.getElementById("navbarMenu");
+        const offcanvasMenu = new bootstrap.Offcanvas(
+          document.getElementById("offcanvasMenu")
+        );
+
+        menuButton.addEventListener("click", function () {
+          if (window.innerWidth < 992) {
+            // Mobile screen - Open offcanvas
+            offcanvasMenu.toggle();
+          } else {
+            // Desktop screen - Toggle collapse navbar
+            const bsCollapse = new bootstrap.Collapse(navbarMenu, {
+              toggle: true,
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

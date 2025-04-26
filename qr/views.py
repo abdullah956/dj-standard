@@ -20,7 +20,7 @@ def certificate_list(request):
 def search_certificate(request):
     certificate = None
     searched = False
-    card_no = request.GET.get('card_no')
+    card_no = request.GET.get('certificate_no')
     if card_no:
         searched = True
         try:
